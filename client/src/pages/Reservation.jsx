@@ -1,17 +1,17 @@
 import { useState } from 'react'
 import { postJSON } from '../api'
 
-export default function Reservation() {
-    const [f, setF] = useState({ date:'', time:'', guests:1, name:'', phone:'' })
-    const submit = async (e)=>{
+export default function Reservation(){
+    const [f,setF] = useState({ date:'', time:'', guests:1, name:'', phone:'' })
+    async function submit(e){
         e.preventDefault()
         const r = await postJSON('/api/reservations', f)
-        if (r.ok){ alert('Бронь создана!'); setF({date:'',time:'',guests:1,name:'',phone:''}) }
+        if(r.ok){ alert('Бронь создана! Мы подтвердим по телефону.'); setF({ date:'', time:'', guests:1, name:'', phone:'' }) }
     }
     return (
-        <div className="container">
+        <>
             <h1>Бронирование столиков</h1>
-            <form className="grid card" onSubmit={submit}>
+            <form className="card" onSubmit={submit}>
                 <div className="card-body grid">
                     <input className="input" type="date" value={f.date} onChange={e=>setF({...f,date:e.target.value})}/>
                     <input className="input" type="time" value={f.time} onChange={e=>setF({...f,time:e.target.value})}/>
@@ -21,6 +21,6 @@ export default function Reservation() {
                     <button className="btn">Забронировать</button>
                 </div>
             </form>
-        </div>
+        </>
     )
 }
