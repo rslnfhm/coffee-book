@@ -1,41 +1,26 @@
-// src/lib/api.js
 import axios from 'axios'
 
+// Укажи порт твоего бэка. Если бэк сейчас слушает 8000 — оставь 8000.
+// Рекомендовано держать бэк на 4000 и проксировать, но это на твоё усмотрение.
 export const API_BASE =
-    import.meta.env.VITE_API_BASE?.replace(/\/$/, '') || 'http://localhost:8000'
+    (import.meta.env.VITE_API_BASE || 'http://localhost:8000').replace(/\/$/, '')
 
-/** Axios-инстанс для /api */
+// ЕДИНАЯ база: .../api
 export const api = axios.create({
     baseURL: `${API_BASE}/api`,
     withCredentials: false,
 })
 
-/** fetch-хелпер: GET JSON (baseURL = API_BASE + path) */
-export async function getJSON(path, options = {}) {
-    const res = await fetch(toUrl(path), { ...options, method: 'GET' })
-    if (!res.ok) throw new Error(`GET ${path} ${res.status}`)
-    const ct = res.headers.get('content-type') || ''
-    return ct.includes('application/json') ? res.json() : res.text()
+// Нормализация пути (чтобы всегда начинался с '/')
+const n = (path) => (path.startsWith('/') ? path : `/${path}`)
+
+// Хелперы поверх axios (всегда используют baseURL = .../api)
+export async function getJSON(path, config) {
+    const { data } = await api.get(n(path), config)
+    return data
 }
 
-/** fetch-хелпер: POST JSON (baseURL = API_BASE + path) */
-export async function postJSON(path, body, options = {}) {
-    const res = await fetch(toUrl(path), {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
-        body: JSON.stringify(body),
-        ...options,
-    })
-    if (!res.ok) {
-        const msg = await res.text().catch(() => '')
-        throw new Error(msg || `POST ${path} ${res.status}`)
-    }
-    const ct = res.headers.get('content-type') || ''
-    return ct.includes('application/json') ? res.json() : res.text()
-}
-
-/* утилита: аккуратно склеиваем базу и путь */
-function toUrl(path) {
-    const p = path.startsWith('/') ? path : `/${path}`
-    return `${API_BASE}${p}`
+export async function postJSON(path, body, config) {
+    const { data } = await api.post(n(path), body, config)
+    return data
 }

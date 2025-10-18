@@ -55,3 +55,51 @@ h1{font-size:30px} h2{font-size:24px;margin-top:22px} h3{font-size:18px;margin-t
 .menu-card img{aspect-ratio:4/3;object-fit:cover}
 .review-quote{position:relative;padding-left:32px}
 .review-quote:before{content:"“";position:absolute;left:4px;top:-8px;font-family:"Playfair Display",serif;font-size:48px;color:#DCCFB9}
+/* ===== Header (stable styles) ===== */
+/* ─── Header ─────────────────────────────────────────────────────────────── */
+.site-header{
+    position: sticky; top: 0; z-index: 100;
+    background: #fff; border-bottom: 1px solid var(--border);
+    backdrop-filter: saturate(180%) blur(10px);
+}
+.header-inner{ display:flex; align-items:center; justify-content:space-between; gap:16px; padding:12px 0; }
+
+.logo{ display:flex; align-items:center; gap:10px; text-decoration:none; color:inherit }
+.logo-icon{ color:#111 }
+.logo-title{ font-weight:700; letter-spacing:.2px }
+
+.burger{
+    position: relative; width: 40px; height: 40px; border: 1px solid var(--border);
+    border-radius: 10px; background: #fff; display: inline-flex; align-items: center; justify-content: center;
+}
+.burger span{
+    position:absolute; width:20px; height:2px; background:#111; transition:transform .25s ease, opacity .2s ease, top .25s ease;
+}
+.burger span:nth-child(1){ top:13px }
+.burger span:nth-child(2){ top:19px }
+.burger span:nth-child(3){ top:25px }
+.burger.is-open span:nth-child(1){ top:19px; transform:rotate(45deg) }
+.burger.is-open span:nth-child(2){ opacity:0 }
+.burger.is-open span:nth-child(3){ top:19px; transform:rotate(-45deg) }
+
+/* Desktop nav hidden on mobile */
+.nav-desktop{ display:none; gap:16px; align-items:center }
+.nav-desktop a{ text-decoration:none; color:#111; padding:6px 8px; border-radius:8px }
+.nav-desktop a.active{ background:#f2f2f2; font-weight:600 }
+.nav-desktop .btn-small{ padding:8px 10px; border-radius:10px }
+
+/* Mobile panel */
+.nav-panel{
+    display: grid; gap: 8px; padding: 0 24px 14px 24px; border-bottom: 1px solid var(--border);
+    max-height: 0; overflow: hidden; transition: max-height .25s ease;
+}
+.nav-panel.open{ max-height: 320px }
+.nav-panel a{ text-decoration:none; color:#111; padding:10px 0 }
+.nav-panel .w-full{ display:block; text-align:center }
+
+/* Брейкпоинт */
+@media (min-width: 900px){
+    .burger{ display:none }
+    .nav-desktop{ display:flex }
+    .nav-panel{ display:none }
+}

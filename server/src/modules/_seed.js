@@ -7,10 +7,10 @@ await connectMongo(env.MONGODB_URI)
 
 if (await MenuItem.countDocuments() === 0) {
     await MenuItem.insertMany([
-        { title: 'Эспрессо', category: 'coffee', price: 150, tags: [], description: 'Классика', image: '/images/espresso.jpg' },
-        { title: 'Капучино', category: 'coffee', price: 220, tags: ['milk'], description: 'Молочная пена', image: '/images/cappuccino.jpg' },
-        { title: 'Веган торт', category: 'dessert', price: 350, tags: ['vegan'], description: 'Без яиц и молока', image: '/images/vegan-cake.jpg' },
-        { title: 'Книга: Кофейные истории', category: 'book', price: 990, tags: [], description: 'Для любителей кофе', image: '/images/book.jpg' }
+        { title: 'Эспрессо', category: 'coffee', price: 150, tags: [], description: 'Классика', image: '/images/coffee.jpg' },
+        { title: 'Капучино', category: 'coffee', price: 220, tags: ['milk'], description: 'Молочная пена', image: '/images/latte.jpg' },
+        { title: 'Веган торт', category: 'dessert', price: 350, tags: ['vegan'], description: 'Без яиц и молока', image: '/images/menu.jpg' },
+        { title: 'Книга: Кофейные истории', category: 'book', price: 990, tags: [], description: 'Для любителей кофе', image: '/images/books2.jpg' }
     ])
     console.log('Seed: menu items added')
 }

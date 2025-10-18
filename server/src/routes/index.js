@@ -10,6 +10,6 @@ router.use('/menu', menuRoutes)
 router.use('/reviews', reviewRoutes)
 router.use('/reservations', reservationRoutes)
 router.use('/events', eventRoutes)
-router.use('/pages', pageRoutes)                                 // ← добавили
+router.use('/pages/about', pageRoutes)                                 // ← добавили
 
 export default router

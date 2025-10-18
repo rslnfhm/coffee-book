@@ -32,7 +32,7 @@ export default function MenuGrid({ category, tag }) {
                     <div style={{ aspectRatio: '4/3', background: '#f6f6f6', marginBottom: 8 }}>
                         {m.image ? (
                             <img
-                                src={m.image}
+                                src='/images/latte.jpg'
                                 alt={m.title}
                                 style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                                 loading="lazy"

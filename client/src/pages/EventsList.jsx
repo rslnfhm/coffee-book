@@ -15,10 +15,10 @@ export default function EventsList() {
                 setLoading(true)
 
                 // 1) События (GET /api/events). Если такого роута нет — вернётся [].
-                const evs = await getJSON('/api/events').catch(() => [])
+                const evs = await getJSON('/events').catch(() => [])
 
                 // 2) Страница «Анонсы» (GET /api/pages/announcements). Если нет — null.
-                const page = await getJSON('/api/pages/announcements').catch(() => null)
+                const page = await getJSON('/pages/announcements').catch(() => null)
 
                 if (!cancel) {
                     const list = Array.isArray(evs?.items) ? evs.items : (Array.isArray(evs) ? evs : [])
