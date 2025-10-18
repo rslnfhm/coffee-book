@@ -100,7 +100,7 @@ export async function seedFromFiles() {
         }
     }
 
-    // Events: upsert по (title+date)
+    // EventsList: upsert по (title+date)
     const eventsTxt = await readOrNull(join(base, 'Анонсы и события.txt'))
     const events = parseEvents(eventsTxt)
     if (events.length) {

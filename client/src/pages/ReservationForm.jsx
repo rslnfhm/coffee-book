@@ -1,7 +1,7 @@
 import { useState } from 'react'
-import { postJSON } from '../api'
+import { postJSON } from '../lib/api.js'
 
-export default function Reservation(){
+export default function ReservationForm(){
     const [f,setF] = useState({ date:'', time:'', guests:1, name:'', phone:'' })
     async function submit(e){
         e.preventDefault()

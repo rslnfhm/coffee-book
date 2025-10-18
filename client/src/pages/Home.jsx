@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { getJSON as getApi, postJSON as postApi } from '../api'
+import { getJSON as getApi, postJSON as postApi } from '../lib/api.js'
 import { getText, getJSON, parseReviews } from '../lib/content'
 
 export default function Home(){
@@ -30,8 +30,8 @@ export default function Home(){
                     <h1>Кофе & Книги — уютное место для вдохновения</h1>
                     <p style={{color:'var(--muted)', marginTop:8}}>{about || 'Атмосфера кофе и литературы — для встреч, чтения и отдыха.'}</p>
                     <div className="row" style={{marginTop:14}}>
-                        <a className="btn" href="/menu">Посмотреть меню</a>
-                        <a className="btn outline" href="/reservation">Забронировать столик</a>
+                        <a className="btn" href="/client/src/pages/MenuGrid">Посмотреть меню</a>
+                        <a className="btn outline" href="/client/src/pages/ReservationForm">Забронировать столик</a>
                         <a className="btn outline" href="/contacts">Контакты</a>
                     </div>
                 </div>
