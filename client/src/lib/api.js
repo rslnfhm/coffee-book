@@ -1,19 +1,41 @@
+// src/lib/api.js
 import axios from 'axios'
 
-// Бэк на 4000. Если используешь Vite proxy — можно убрать VITE_API_URL и оставить относительные пути.
-const BASE = import.meta.env.VITE_API_URL || 'http://localhost:4000'
+export const API_BASE =
+    import.meta.env.VITE_API_BASE?.replace(/\/$/, '') || 'http://localhost:8000'
 
-export const api = axios.create({ baseURL: `${BASE}/api` })
+/** Axios-инстанс для /api */
+export const api = axios.create({
+    baseURL: `${API_BASE}/api`,
+    withCredentials: false,
+})
 
-// Универсальные хелперы (чтобы не переписывать существующие импорты)
-export async function getJSON(url, config) {
-    // ВНИМАНИЕ: здесь ждём путь БЕЗ /api, т.к. baseURL уже /api
-    return (await api.get(url, config)).data
+/** fetch-хелпер: GET JSON (baseURL = API_BASE + path) */
+export async function getJSON(path, options = {}) {
+    const res = await fetch(toUrl(path), { ...options, method: 'GET' })
+    if (!res.ok) throw new Error(`GET ${path} ${res.status}`)
+    const ct = res.headers.get('content-type') || ''
+    return ct.includes('application/json') ? res.json() : res.text()
 }
-export async function postJSON(url, data, config) {
-    return (await api.post(url, data, config)).data
+
+/** fetch-хелпер: POST JSON (baseURL = API_BASE + path) */
+export async function postJSON(path, body, options = {}) {
+    const res = await fetch(toUrl(path), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
+        body: JSON.stringify(body),
+        ...options,
+    })
+    if (!res.ok) {
+        const msg = await res.text().catch(() => '')
+        throw new Error(msg || `POST ${path} ${res.status}`)
+    }
+    const ct = res.headers.get('content-type') || ''
+    return ct.includes('application/json') ? res.json() : res.text()
 }
 
-// Алиасы на всякий случай (если где-то остались старые названия)
-export const getApi = getJSON
-export const postApi = postJSON
+/* утилита: аккуратно склеиваем базу и путь */
+function toUrl(path) {
+    const p = path.startsWith('/') ? path : `/${path}`
+    return `${API_BASE}${p}`
+}

@@ -1,10 +1,11 @@
-import { useEffect, useState } from 'react'
-import { getJSON, postJSON } from '../lib/api'
+// src/pages/EventsList.jsx
+import React, { useEffect, useState } from 'react'
+import { getJSON, postJSON } from '../lib/api' // <-- оба хелпера тут
 
 export default function EventsList() {
     const [events, setEvents] = useState([])
     const [ann, setAnn] = useState('') // текст анонсов из БД
-    const [reg, setReg] = useState({ eventId: '', name: '', phone: '' })
+    const [reg, setReg] = useState({ eventId: '', name: '', phone: '', email: '' })
     const [loading, setLoading] = useState(true)
 
     useEffect(() => {
@@ -12,12 +13,16 @@ export default function EventsList() {
         async function load() {
             try {
                 setLoading(true)
-                // 1) события
-                const evs = await getJSON('/events')
-                // 2) «Анонсы и события» — как страница из БД (slug: announcements)
-                const page = await getJSON('/pages/announcements').catch(() => null)
+
+                // 1) События (GET /api/events). Если такого роута нет — вернётся [].
+                const evs = await getJSON('/api/events').catch(() => [])
+
+                // 2) Страница «Анонсы» (GET /api/pages/announcements). Если нет — null.
+                const page = await getJSON('/api/pages/announcements').catch(() => null)
+
                 if (!cancel) {
-                    setEvents(evs || [])
+                    const list = Array.isArray(evs?.items) ? evs.items : (Array.isArray(evs) ? evs : [])
+                    setEvents(list)
                     setAnn(page?.body || '')
                 }
             } finally {
@@ -30,11 +35,34 @@ export default function EventsList() {
 
     async function submit(e) {
         e.preventDefault()
-        if (!reg.eventId || !reg.name) return
-        const r = await postJSON('/events/register', reg)
-        if (r?.ok) {
-            alert('Заявка отправлена!')
-            setReg({ eventId: '', name: '', phone: '' })
+        if (!reg.eventId || !reg.name || !reg.phone) {
+            alert('Выберите событие и заполните имя/телефон')
+            return
+        }
+
+        const ev = events.find(x => String(x._id || x.id) === String(reg.eventId))
+        const payload = {
+            eventTitle: ev?.title || 'Событие',
+            date: ev?.date || '',
+            time: ev?.time || '',
+            place: ev?.place || '',
+            requiresRegistration: !!ev?.requiresRegistration,
+            name: reg.name.trim(),
+            phone: reg.phone.trim(),
+            email: reg.email?.trim() || undefined,
+        }
+
+        try {
+            const r = await postJSON('/api/registrations', payload)
+            // наш бэкенд возвращает { ok: true, id: ... }
+            if (r?.ok) {
+                alert('Заявка отправлена!')
+                setReg({ eventId: '', name: '', phone: '', email: '' })
+            } else {
+                alert('Не удалось отправить заявку')
+            }
+        } catch (err) {
+            alert(err?.message || 'Ошибка отправки')
         }
     }
 
@@ -45,14 +73,23 @@ export default function EventsList() {
             {loading ? (
                 <p>Загрузка…</p>
             ) : (
-                <ul className="grid">
+                <ul className="grid grid-3">
                     {events.map((ev) => (
-                        <li key={ev._id} className="card">
-                            <img src="/images/coffee-steam.webp" loading="lazy" alt={ev.title} />
+                        <li key={ev._id || ev.id || ev.title} className="card">
+                            <div className="media">
+                                <img
+                                    src={ev.image || '/images/coffee-steam.webp'}
+                                    loading="lazy"
+                                    alt={ev.title}
+                                />
+                            </div>
                             <div className="card-body">
                                 <b>{ev.title}</b>
-                                <p style={{ color: 'var(--muted)' }}>{ev.date}</p>
-                                <p>{ev.description}</p>
+                                <p className="subtitle" style={{ margin: '6px 0' }}>
+                                    {ev.date}{ev.time ? ` • ${ev.time}` : ''}
+                                </p>
+                                {ev.description && <p>{ev.description}</p>}
+                                {ev.place && <p className="text-sm" style={{ opacity:.8 }}>Место: {ev.place}</p>}
                             </div>
                         </li>
                     ))}
@@ -62,18 +99,20 @@ export default function EventsList() {
 
             {!!ann && (
                 <>
-                    <h2>Анонсы (из бэкенда)</h2>
+                    <h2 style={{ marginTop: 24 }}>Анонсы (из бэкенда)</h2>
                     <div className="card">
                         <div className="card-body">
-                            <pre style={{ whiteSpace: 'pre-wrap', fontFamily: 'Inter, system-ui' }}>{ann}</pre>
+              <pre style={{ whiteSpace: 'pre-wrap', margin: 0, fontFamily: 'Inter, system-ui' }}>
+                {ann}
+              </pre>
                         </div>
                     </div>
                 </>
             )}
 
-            <h2>Регистрация</h2>
+            <h2 style={{ marginTop: 24 }}>Регистрация</h2>
             <form className="card" onSubmit={submit}>
-                <div className="card-body grid">
+                <div className="card-body grid" style={{ gridTemplateColumns: '1fr 1fr', gap: 12 }}>
                     <select
                         className="select"
                         value={reg.eventId}
@@ -81,24 +120,35 @@ export default function EventsList() {
                     >
                         <option value="">Выберите событие</option>
                         {events.map((ev) => (
-                            <option key={ev._id} value={ev._id}>
+                            <option key={ev._id || ev.id || ev.title} value={ev._id || ev.id || ''}>
                                 {ev.title}
                             </option>
                         ))}
                     </select>
+
                     <input
                         className="input"
                         placeholder="Имя"
                         value={reg.name}
                         onChange={(e) => setReg({ ...reg, name: e.target.value })}
+                        required
                     />
                     <input
                         className="input"
                         placeholder="Телефон"
                         value={reg.phone}
                         onChange={(e) => setReg({ ...reg, phone: e.target.value })}
+                        required
                     />
-                    <button className="btn">Отправить</button>
+                    <input
+                        className="input"
+                        placeholder="Email (необязательно)"
+                        type="email"
+                        value={reg.email}
+                        onChange={(e) => setReg({ ...reg, email: e.target.value })}
+                    />
+
+                    <button className="btn primary" type="submit">Отправить</button>
                 </div>
             </form>
         </>
